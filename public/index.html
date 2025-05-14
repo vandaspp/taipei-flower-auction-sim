@@ -1,21 +1,67 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台北花市導覽模擬拍賣系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>台北花市導覽模擬拍賣</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 1em; }
-    h1 { font-size: 1.4em; }
-    button, input { font-size: 1.2em; margin: 0.5em; padding: 0.6em 1em; }
-    #price { font-size: 2em; color: red; margin: 1em 0; }
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    h1 { font-size: 1.5em; }
+    input, button { font-size: 1.2em; margin: 0.5em; padding: 10px; width: 80%; max-width: 300px; }
+    #price { font-size: 2em; color: red; margin: 20px 0; }
+    #bidBtn { font-size: 1.5em; padding: 12px 40px; }
   </style>
 </head>
 <body>
-  <h1>🌸 台北花市導覽模擬拍賣系統 🌸</h1>
-  <div id="price">$250</div>
-  <button id="bid">我要出價</button>
-  <p>得標紀錄</p>
+  <h1>🌼 台北花市導覽模擬拍賣 🌼</h1>
+
+  <div id="entry">
+    <input id="userName" placeholder="請輸入您的名稱" />
+    <button onclick="join()">進入拍賣</button>
+  </div>
+
+  <div id="auction" style="display:none;">
+    <h2 id="itemName"></h2>
+    <div id="price">$0</div>
+    <button id="bidBtn" onclick="bid()" disabled>我要出價</button>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let user = "";
+
+    function join() {
+      user = document.getElementById('userName').value.trim();
+      if (!user) return alert("請輸入名稱");
+      socket.emit('join', { user });
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('auction').style.display = 'block';
+    }
+
+    function bid() {
+      socket.emit('bid');
+    }
+
+    socket.on('preview', data => {
+      document.getElementById('itemName').textContent = "預告商品：" + data.item;
+      document.getElementById('price').textContent = "$" + data.price;
+      document.getElementById('bidBtn').disabled = true;
+    });
+
+    socket.on('start', data => {
+      document.getElementById('itemName').textContent = "拍賣商品：" + data.item;
+      document.getElementById('price').textContent = "$" + data.price;
+      document.getElementById('bidBtn').disabled = false;
+    });
+
+    socket.on('stop', () => {
+      document.getElementById('bidBtn').disabled = true;
+    });
+
+    socket.on('priceUpdate', price => {
+      document.getElementById('price').textContent = "$" + price;
+    });
+  </script>
 </body>
 </html>
