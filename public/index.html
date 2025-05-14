@@ -1,26 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>台北花市導覽模擬拍賣</title>
+  <title>台北花市導覽模擬拍賣系統</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    body { font-family: sans-serif; text-align: center; padding: 1em; }
     h1 { font-size: 1.5em; }
-    input, button { font-size: 1.2em; margin: 0.5em; padding: 10px; width: 80%; max-width: 300px; }
-    #price { font-size: 2em; color: red; margin: 20px 0; }
-    #bidBtn { font-size: 1.5em; padding: 12px 40px; }
+    input, button { font-size: 1.2em; margin: 10px; padding: 12px 20px; width: 80%; max-width: 300px; }
+    #price { font-size: 2.2em; color: red; font-weight: bold; margin: 20px 0; }
+    #bidBtn { font-size: 1.6em; padding: 18px 60px; margin-top: 20px; }
+    #entry, #host, #join, #auction { display: none; }
   </style>
 </head>
 <body>
   <h1>🌼 台北花市導覽模擬拍賣 🌼</h1>
 
   <div id="entry">
-    <input id="userName" placeholder="請輸入您的名稱" />
+    <p>請選擇您的角色：</p>
+    <button onclick="showHost()">我是主持人</button>
+    <button onclick="showJoin()">我是參與者</button>
+  </div>
+
+  <div id="host">
+    <p>主持人密碼：</p>
+    <input type="password" id="hostPass" placeholder="輸入密碼"/>
+    <button onclick="loginHost()">登入</button>
+    <div id="hostPanel" style="display:none;">
+      <p>花卉名稱：<input id="item"></p>
+      <p>起標價：<input id="start" type="number"></p>
+      <p>底價：<input id="min" type="number"></p>
+      <p>遞減金額：<input id="step" type="number"></p>
+      <button onclick="preview()">拍賣預告</button>
+      <button onclick="start()">開始拍賣</button>
+      <button onclick="stop()">結束</button>
+    </div>
+  </div>
+
+  <div id="join">
+    <p>請輸入您的名稱：</p>
+    <input id="userName" />
     <button onclick="join()">進入拍賣</button>
   </div>
 
-  <div id="auction" style="display:none;">
+  <div id="auction">
     <h2 id="itemName"></h2>
     <div id="price">$0</div>
     <button id="bidBtn" onclick="bid()" disabled>我要出價</button>
@@ -29,13 +52,52 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    let user = "";
+    const PASSWORD = "flower123";
+
+    function showHost() {
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('host').style.display = 'block';
+    }
+
+    function showJoin() {
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('join').style.display = 'block';
+    }
+
+    function loginHost() {
+      const pw = document.getElementById('hostPass').value;
+      if (pw === PASSWORD) {
+        document.getElementById('hostPass').style.display = 'none';
+        document.querySelector('#host button').style.display = 'none';
+        document.getElementById('hostPanel').style.display = 'block';
+      } else {
+        alert("密碼錯誤");
+      }
+    }
+
+    function preview() {
+      const data = {
+        item: document.getElementById('item').value,
+        price: parseInt(document.getElementById('start').value),
+        min: parseInt(document.getElementById('min').value),
+        step: parseInt(document.getElementById('step').value)
+      };
+      socket.emit('preview', data);
+    }
+
+    function start() {
+      socket.emit('start');
+    }
+
+    function stop() {
+      socket.emit('stop');
+    }
 
     function join() {
-      user = document.getElementById('userName').value.trim();
+      const user = document.getElementById('userName').value.trim();
       if (!user) return alert("請輸入名稱");
       socket.emit('join', { user });
-      document.getElementById('entry').style.display = 'none';
+      document.getElementById('join').style.display = 'none';
       document.getElementById('auction').style.display = 'block';
     }
 
