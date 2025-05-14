@@ -1,139 +1,134 @@
 
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>荷蘭式拍賣 v2.2</title>
+  <meta charset="UTF-8">
+  <title>台北花市導覽模擬拍賣</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    #admin-panel, #auction-info, #history, #current-price { margin-top: 20px; }
-    input, button { margin: 5px; padding: 8px; }
+    body { font-family: sans-serif; text-align: center; }
+    #auction, #host, #login, #join { display: none; }
+    input, button { margin: 5px; padding: 5px; }
+    .large { font-size: 2em; margin: 10px 0; }
   </style>
 </head>
 <body>
-  <h1>荷蘭式拍賣系統 v2.2</h1>
+  <h2>台北花市導覽模擬拍賣系統</h2>
 
-  <div id="login-panel">
-    <input type="password" id="admin-password" placeholder="輸入主持人密碼">
-    <button onclick="login()">主持人登入</button>
+  <div id="login">
+    <p>請輸入主持人密碼</p>
+    <input id="hostPass" type="password" placeholder="輸入密碼" />
+    <button onclick="verifyHost()">登入主持人</button>
   </div>
 
-  <div id="admin-panel" style="display:none;">
-    <h2>主持人控制台</h2>
-    <input type="text" id="item" placeholder="輸入拍賣品名稱">
-    <input type="number" id="startPrice" placeholder="起始價格">
-    <input type="number" id="minPrice" placeholder="底價">
-    <input type="number" id="interval" placeholder="每次降價間隔(ms)">
-    <input type="number" id="decrease" placeholder="每次降價金額">
-    <button onclick="previewAuction()">📢 拍賣預告</button>
-    <button onclick="startAuction()">🎬 開始拍賣</button>
-    <button onclick="stopAuction()">🛑 結束拍賣</button>
-    <button onclick="clearHistory()">🗑 清除得標紀錄</button>
+  <div id="join">
+    <p>請輸入您的名字參與拍賣</p>
+    <input id="userName" placeholder="您的名稱" />
+    <button onclick="joinAuction()">進入</button>
   </div>
 
-  <div id="join-panel">
-    <input type="text" id="username" placeholder="輸入您的名稱">
-    <button onclick="joinAuction()">加入拍賣</button>
+  <div id="host">
+    <h3>主持人控制台</h3>
+    <input id="item" placeholder="花卉名稱">
+    <input id="start" placeholder="起標價" type="number">
+    <input id="min" placeholder="底價" type="number">
+    <input id="decrease" placeholder="每次遞減金額" type="number">
+    <input id="interval" placeholder="遞減間隔(ms)" type="number" value="1000">
+    <br>
+    <button onclick="previewAuction()">拍賣預告</button>
+    <button onclick="startAuction()">開始拍賣</button>
+    <button onclick="stopAuction()">結束</button>
+    <button onclick="clearHistory()">清除紀錄</button>
   </div>
 
-  <div id="auction-info" style="display:none;">
-    <h2>正在拍賣：<span id="itemName"></span></h2>
-    <div id="current-price" style="font-size: 36px;">價格倒數中...</div>
-    <button onclick="bid()">💰 出價</button>
+  <div id="auction">
+    <h3 id="currentItem"></h3>
+    <div id="priceDisplay" class="large"></div>
+    <button id="bidBtn" onclick="placeBid()">我要出價</button>
   </div>
 
-  <div id="history">
-    <h3>得標紀錄</h3>
-    <ul id="winner-list"></ul>
-  </div>
+  <h4>得標紀錄</h4>
+  <ul id="history"></ul>
 
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
-    let socket = io();
-    let isHost = false;
-    let user = '';
+    const socket = io();
+    const PASSWORD = "flower123";
+    let isHost = false, user = "";
 
-    function login() {
-      const pw = document.getElementById('admin-password').value;
-      if (pw === "flower123") {
+    function verifyHost() {
+      const pw = document.getElementById('hostPass').value;
+      if (pw === PASSWORD) {
         isHost = true;
-        document.getElementById('login-panel').style.display = 'none';
-        document.getElementById('admin-panel').style.display = 'block';
-      } else {
-        alert("密碼錯誤");
-      }
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('host').style.display = 'block';
+      } else alert("密碼錯誤");
     }
 
     function joinAuction() {
-      user = document.getElementById("username").value;
-      if (!user) return alert("請輸入名稱");
-      document.getElementById("join-panel").style.display = "none";
+      const name = document.getElementById('userName').value.trim();
+      if (!name) return alert("請輸入名稱");
+      user = name;
+      document.getElementById('join').style.display = 'none';
+      document.getElementById('auction').style.display = 'block';
     }
 
     function previewAuction() {
-      const data = collectAuctionData();
-      if (!data) return;
-      socket.emit("preview", data);
+      const data = getFormData();
+      socket.emit('preview', data);
     }
 
     function startAuction() {
-      const data = collectAuctionData();
-      if (!data) return;
-      socket.emit("start", data);
+      const data = getFormData();
+      socket.emit('start', data);
     }
 
     function stopAuction() {
-      socket.emit("stop");
+      socket.emit('stop');
     }
 
     function clearHistory() {
-      socket.emit("clear");
-      document.getElementById("winner-list").innerHTML = "";
+      document.getElementById('history').innerHTML = '';
+      socket.emit('clear');
     }
 
-    function bid() {
-      socket.emit("bid", { user });
+    function placeBid() {
+      socket.emit('bid', { user });
     }
 
-    function collectAuctionData() {
-      const item = document.getElementById("item").value;
-      const start = parseFloat(document.getElementById("startPrice").value);
-      const min = parseFloat(document.getElementById("minPrice").value);
-      const interval = parseInt(document.getElementById("interval").value);
-      const decrease = parseFloat(document.getElementById("decrease").value);
-      if (!item || isNaN(start) || isNaN(min) || isNaN(interval) || isNaN(decrease)) {
-        alert("請填入所有拍賣資料");
-        return null;
-      }
-      return { item, start, min, interval, decrease };
+    function getFormData() {
+      return {
+        item: document.getElementById('item').value,
+        start: parseInt(document.getElementById('start').value),
+        min: parseInt(document.getElementById('min').value),
+        decrease: parseInt(document.getElementById('decrease').value),
+        interval: parseInt(document.getElementById('interval').value)
+      };
     }
 
-    socket.on("preview", ({ item, start }) => {
-      document.getElementById("itemName").innerText = `${item}（即將以 $${start} 拍賣）`;
-      document.getElementById("auction-info").style.display = "block";
+    socket.on('preview', ({ item, start }) => {
+      document.getElementById('currentItem').textContent = `預告：${item} 起標價 $${start}`;
+      document.getElementById('priceDisplay').textContent = '';
     });
 
-    socket.on("update", ({ item, price }) => {
-      document.getElementById("itemName").innerText = item;
-      document.getElementById("current-price").innerText = `$${price}`;
-      document.getElementById("auction-info").style.display = "block";
+    socket.on('update', ({ item, price }) => {
+      document.getElementById('currentItem').textContent = `拍賣中：${item}`;
+      document.getElementById('priceDisplay').textContent = `$${price}`;
     });
 
-    socket.on("winner", ({ user, item, price }) => {
-      const li = document.createElement("li");
-      li.textContent = `${user} 得標「${item}」，價格 $${price}`;
-      document.getElementById("winner-list").prepend(li);
-      document.getElementById("auction-info").style.display = "none";
+    socket.on('winner', ({ user, item, price }) => {
+      const li = document.createElement('li');
+      li.textContent = `${user} 得標「${item}」$${price}`;
+      document.getElementById('history').appendChild(li);
     });
 
-    socket.on("clear", () => {
-      document.getElementById("winner-list").innerHTML = "";
+    socket.on('clear', () => {
+      document.getElementById('history').innerHTML = '';
     });
 
-    socket.on("stop", () => {
-      document.getElementById("auction-info").style.display = "none";
-    });
+    window.onload = () => {
+      document.getElementById('login').style.display = 'block';
+      document.getElementById('join').style.display = 'block';
+    };
   </script>
-  <script src="/socket.io/socket.io.js"></script>
 </body>
 </html>

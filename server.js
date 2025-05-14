@@ -11,14 +11,12 @@ app.use(express.static(__dirname + '/public'));
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-let auctionInterval;
-let currentPrice = 0;
 let auctionData = {};
+let currentPrice = 0;
+let auctionInterval;
 let hasWinner = false;
 
 io.on('connection', socket => {
-  console.log('User connected');
-
   socket.on('preview', data => {
     auctionData = data;
     currentPrice = data.start;
