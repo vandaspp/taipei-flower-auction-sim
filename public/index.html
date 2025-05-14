@@ -1,1 +1,53 @@
-<!DOCTYPE html><html><body><h1>v31116sync Ready</h1></body></html>
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>花市拍賣 v4</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 1em; }
+    h1 { font-size: 1.5em; }
+    #price { font-size: 2.5em; color: red; margin: 1em 0; font-weight: bold; }
+    button { font-size: 1.5em; padding: 1em 2em; margin: 1em; }
+    #item { font-size: 1.3em; margin: 0.5em 0; }
+  </style>
+</head>
+<body>
+  <h1>🌸 花市模擬拍賣 v4 🌸</h1>
+  <div id="item">尚未開始</div>
+  <div id="price">$0</div>
+  <button id="bidBtn" disabled>我要出價</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const bidBtn = document.getElementById("bidBtn");
+    const itemDiv = document.getElementById("item");
+    const priceDiv = document.getElementById("price");
+
+    bidBtn.onclick = () => {
+      socket.emit("bid");
+    };
+
+    socket.on("auction-preview", data => {
+      itemDiv.textContent = "預告商品：" + data.item;
+      priceDiv.textContent = "$" + data.price;
+      bidBtn.disabled = true;
+    });
+
+    socket.on("auction-start", data => {
+      itemDiv.textContent = "拍賣中：" + data.item;
+      priceDiv.textContent = "$" + data.price;
+      bidBtn.disabled = false;
+    });
+
+    socket.on("auction-stop", () => {
+      bidBtn.disabled = true;
+    });
+
+    socket.on("auction-update", price => {
+      priceDiv.textContent = "$" + price;
+    });
+  </script>
+</body>
+</html>

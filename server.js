@@ -1,59 +1,45 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.static('public'));
 
-let auctionData = {
+let auction = {
   item: '',
   price: 0,
   min: 0,
   step: 0,
-  isRunning: false,
-  participants: new Set()
+  running: false,
 };
 
 io.on('connection', socket => {
-  socket.on('join', ({ user }) => {
-    socket.username = user;
-    auctionData.participants.add(user);
-    io.emit('userCount', auctionData.participants.size);
+  socket.on('host-preview', data => {
+    auction = { ...auction, ...data, running: false };
+    io.emit('auction-preview', auction);
   });
 
-  socket.on('preview', data => {
-    auctionData = { ...auctionData, ...data, isRunning: false };
-    io.emit('preview', { item: data.item, price: data.price });
+  socket.on('host-start', () => {
+    auction.running = true;
+    io.emit('auction-start', auction);
   });
 
-  socket.on('start', () => {
-    auctionData.isRunning = true;
-    io.emit('start', auctionData);
-  });
-
-  socket.on('stop', () => {
-    auctionData.isRunning = false;
-    io.emit('stop');
+  socket.on('host-stop', () => {
+    auction.running = false;
+    io.emit('auction-stop');
   });
 
   socket.on('bid', () => {
-    if (auctionData.isRunning) {
-      auctionData.price -= auctionData.step;
-      if (auctionData.price < auctionData.min) auctionData.price = auctionData.min;
-      io.emit('priceUpdate', { price: auctionData.price });
-    }
-  });
-
-  socket.on('disconnect', () => {
-    if (socket.username) {
-      auctionData.participants.delete(socket.username);
-      io.emit('userCount', auctionData.participants.size);
+    if (auction.running) {
+      auction.price = Math.max(auction.price - auction.step, auction.min);
+      io.emit('auction-update', auction.price);
     }
   });
 });
 
 server.listen(process.env.PORT || 3000, () => {
-  console.log("Auction system running");
+  console.log("Auction server running on port 3000");
 });

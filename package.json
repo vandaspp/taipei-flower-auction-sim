@@ -1,6 +1,6 @@
 {
-  "name": "taipei-flower-auction-v31116sync",
-  "version": "3.1.6",
+  "name": "taipei-flower-auction-v4",
+  "version": "4.0.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
