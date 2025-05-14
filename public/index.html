@@ -1,165 +1,68 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>台北花市導覽模擬拍賣系統</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>台北花市導覽模擬拍賣</title>
   <style>
     body { font-family: sans-serif; text-align: center; padding: 20px; }
-    input, button { margin: 10px; padding: 10px; font-size: 18px; }
-    .large { font-size: 36px; margin: 15px 0; color: red; font-weight: bold; }
-    #auction, #host, #login, #join { display: none; }
-    #bidBtn { font-size: 22px; padding: 12px 30px; }
+    h1 { font-size: 1.5em; }
+    input, button { font-size: 1.2em; margin: 0.5em; padding: 10px; width: 80%; max-width: 300px; }
+    #price { font-size: 2em; color: red; margin: 20px 0; }
+    #bidBtn { font-size: 1.5em; padding: 12px 40px; }
   </style>
 </head>
 <body>
-  <h2>🌸 台北花市導覽模擬拍賣系統 🌸</h2>
+  <h1>🌼 台北花市導覽模擬拍賣 🌼</h1>
 
   <div id="entry">
-    <p>請選擇您的角色：</p>
-    <button onclick="showLogin()">我是主持人</button>
-    <button onclick="showJoin()">我是參與者</button>
+    <input id="userName" placeholder="請輸入您的名稱" />
+    <button onclick="join()">進入拍賣</button>
   </div>
 
-  <div id="login">
-    <p>請輸入主持人密碼</p>
-    <input id="hostPass" type="password" placeholder="輸入密碼" />
-    <button onclick="verifyHost()">登入主持人</button>
+  <div id="auction" style="display:none;">
+    <h2 id="itemName"></h2>
+    <div id="price">$0</div>
+    <button id="bidBtn" onclick="bid()" disabled>我要出價</button>
   </div>
 
-  <div id="join">
-    <p>請輸入您的名字參與拍賣</p>
-    <input id="userName" placeholder="您的名稱" />
-    <button onclick="joinAuction()">進入</button>
-  </div>
-
-  <div id="host">
-    <h3>主持人控制台</h3>
-    <div id="userCounter">👥 目前參與者人數：0 人</div>
-    <input id="item" placeholder="花卉名稱">
-    <input id="start" placeholder="起標價" type="number">
-    <input id="min" placeholder="底價" type="number">
-    <input id="decrease" placeholder="每次遞減金額" type="number">
-    <input id="interval" placeholder="遞減間隔(ms)" type="number" value="1000">
-    <br>
-    <button onclick="previewAuction()">拍賣預告</button>
-    <button onclick="startAuction()">開始拍賣</button>
-    <button onclick="stopAuction()">結束</button>
-    <button onclick="clearHistory()">清除紀錄</button>
-  </div>
-
-  <div id="auction">
-    <h3 id="currentItem"></h3>
-    <div id="priceDisplay" class="large"></div>
-    <button id="bidBtn" onclick="placeBid()">我要出價</button>
-  </div>
-
-  <h4>得標紀錄</h4>
-  <ul id="history"></ul>
-
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
-    const PASSWORD = "flower123";
-    let isHost = false, user = "";
+    let user = "";
 
-    function showLogin() {
-      document.getElementById('entry').style.display = 'none';
-      document.getElementById('login').style.display = 'block';
-    }
-
-    function showJoin() {
-      document.getElementById('entry').style.display = 'none';
-      document.getElementById('join').style.display = 'block';
-    }
-
-    function verifyHost() {
-      const pw = document.getElementById('hostPass').value;
-      if (pw === PASSWORD) {
-        isHost = true;
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('host').style.display = 'block';
-      } else alert("密碼錯誤");
-    }
-
-    function joinAuction() {
-      const name = document.getElementById('userName').value.trim();
-      if (!name) return alert("請輸入名稱");
-      user = name;
-      document.getElementById('join').style.display = 'none';
-      document.getElementById('auction').style.display = 'block';
-      document.getElementById('bidBtn').disabled = true;
+    function join() {
+      user = document.getElementById('userName').value.trim();
+      if (!user) return alert("請輸入名稱");
       socket.emit('join', { user });
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('auction').style.display = 'block';
     }
 
-    function previewAuction() {
-      const data = getFormData();
-      socket.emit('preview', data);
+    function bid() {
+      socket.emit('bid');
     }
 
-    function startAuction() {
-      const data = getFormData();
-      socket.emit('start', data);
-    }
-
-    function stopAuction() {
-      socket.emit('stop');
-    }
-
-    function clearHistory() {
-      document.getElementById('history').innerHTML = '';
-      socket.emit('clear');
-    }
-
-    function placeBid() {
-      socket.emit('bid', { user });
-    }
-
-    function getFormData() {
-      return {
-        item: document.getElementById('item').value,
-        start: parseInt(document.getElementById('start').value),
-        min: parseInt(document.getElementById('min').value),
-        decrease: parseInt(document.getElementById('decrease').value),
-        interval: parseInt(document.getElementById('interval').value)
-      };
-    }
-
-    socket.on('preview', ({ item, start }) => {
-      document.getElementById('currentItem').textContent = `預告：${item} 起標價 $${start}`;
-      document.getElementById('priceDisplay').textContent = '';
+    socket.on('preview', data => {
+      document.getElementById('itemName').textContent = "預告商品：" + data.item;
+      document.getElementById('price').textContent = "$" + data.price;
       document.getElementById('bidBtn').disabled = true;
     });
 
-    socket.on('update', ({ item, price }) => {
-      document.getElementById('currentItem').textContent = `拍賣中：${item}`;
-      document.getElementById('priceDisplay').textContent = `$${price}`;
+    socket.on('start', data => {
+      document.getElementById('itemName').textContent = "拍賣商品：" + data.item;
+      document.getElementById('price').textContent = "$" + data.price;
+      document.getElementById('hostDecrementInfo').textContent = `🔽 每 ${data.interval}ms 減 ${data.step} 元`;
       document.getElementById('bidBtn').disabled = false;
-    });
-
-    socket.on('winner', ({ user, item, price }) => {
-      const li = document.createElement('li');
-      li.textContent = `${user} 得標「${item}」$${price}`;
-      document.getElementById('history').appendChild(li);
-    });
-
-    socket.on('clear', () => {
-      document.getElementById('history').innerHTML = '';
     });
 
     socket.on('stop', () => {
       document.getElementById('bidBtn').disabled = true;
     });
 
-    socket.on('userCount', (count) => {
-      if (isHost) {
-        document.getElementById('userCounter').textContent = `👥 目前參與者人數：${count} 人`;
-      }
+    socket.on('priceUpdate', price => {
+      document.getElementById('price').textContent = "$" + price;
     });
-
-    window.onload = () => {
-      document.getElementById('entry').style.display = 'block';
-    };
   </script>
 </body>
 </html>
