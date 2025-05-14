@@ -1,13 +1,13 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
 app.use(express.static('public'));
 
-let auctionState = {
+let auctionData = {
   item: '',
   price: 0,
   min: 0,
@@ -19,37 +19,37 @@ let auctionState = {
 io.on('connection', socket => {
   socket.on('join', ({ user }) => {
     socket.username = user;
-    auctionState.participants.add(user);
-    io.emit('userCount', auctionState.participants.size);
+    auctionData.participants.add(user);
+    io.emit('userCount', auctionData.participants.size);
   });
 
   socket.on('preview', data => {
-    auctionState = { ...auctionState, ...data, isRunning: false };
+    auctionData = { ...auctionData, ...data, isRunning: false };
     io.emit('preview', { item: data.item, price: data.price });
   });
 
   socket.on('start', () => {
-    auctionState.isRunning = true;
-    io.emit('start', auctionState);
+    auctionData.isRunning = true;
+    io.emit('start', auctionData);
   });
 
   socket.on('stop', () => {
-    auctionState.isRunning = false;
+    auctionData.isRunning = false;
     io.emit('stop');
   });
 
   socket.on('bid', () => {
-    if (auctionState.isRunning) {
-      auctionState.price -= auctionState.step;
-      if (auctionState.price < auctionState.min) auctionState.price = auctionState.min;
-      io.emit('priceUpdate', auctionState.price);
+    if (auctionData.isRunning) {
+      auctionData.price -= auctionData.step;
+      if (auctionData.price < auctionData.min) auctionData.price = auctionData.min;
+      io.emit('priceUpdate', { price: auctionData.price });
     }
   });
 
   socket.on('disconnect', () => {
     if (socket.username) {
-      auctionState.participants.delete(socket.username);
-      io.emit('userCount', auctionState.participants.size);
+      auctionData.participants.delete(socket.username);
+      io.emit('userCount', auctionData.participants.size);
     }
   });
 });
