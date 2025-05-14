@@ -107,11 +107,13 @@
     }
 
     socket.on('preview', ({ item, start }) => {
+      document.getElementById('bidBtn').disabled = true;
       document.getElementById('currentItem').textContent = `預告：${item} 起標價 $${start}`;
       document.getElementById('priceDisplay').textContent = '';
     });
 
     socket.on('update', ({ item, price }) => {
+      document.getElementById('bidBtn').disabled = false;
       document.getElementById('currentItem').textContent = `拍賣中：${item}`;
       document.getElementById('priceDisplay').textContent = `$${price}`;
     });
@@ -127,12 +129,7 @@
     });
 
     window.onload = () => {
-      const pw = window.location.hash === "#host";
-      if (pw) {
-        document.getElementById('login').style.display = 'block';
-      } else {
-        document.getElementById('join').style.display = 'block';
-      }
+      document.getElementById('login').style.display = 'block';
     };
   </script>
 </body>
