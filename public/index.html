@@ -88,6 +88,7 @@
       user = name;
       document.getElementById('join').style.display = 'none';
       document.getElementById('auction').style.display = 'block';
+      document.getElementById('bidBtn').disabled = true;
       socket.emit('join', { user });
     }
 
