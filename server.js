@@ -15,6 +15,7 @@ let auctionData = {};
 let currentPrice = 0;
 let auctionInterval;
 let hasWinner = false;
+let participants = new Set();
 
 io.on('connection', socket => {
   socket.on('preview', data => {
@@ -52,6 +53,11 @@ io.on('connection', socket => {
       clearInterval(auctionInterval);
       io.emit('winner', { user, item: auctionData.item, price: currentPrice });
     }
+  });
+
+  socket.on('join', ({ user }) => {
+    participants.add(user);
+    io.emit('userCount', participants.size);
   });
 
   socket.on('clear', () => {
