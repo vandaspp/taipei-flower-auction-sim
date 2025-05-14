@@ -1,6 +1,6 @@
 {
-  "name": "taipei-flower-auction-sim",
-  "version": "1.0.0",
+  "name": "taipei-flower-auction-v31031p3",
+  "version": "3.1.0",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

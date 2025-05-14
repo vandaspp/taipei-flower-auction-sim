@@ -3,12 +3,13 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>台北花市導覽模擬拍賣</title>
+  <title>台北花市導覽模擬拍賣系統</title>
   <style>
-    body { font-family: sans-serif; text-align: center; }
+    body { font-family: sans-serif; text-align: center; padding: 10px; }
+    input, button { margin: 5px; padding: 10px; font-size: 16px; }
+    .large { font-size: 40px; margin: 20px 0; color: red; font-weight: bold; }
     #auction, #host, #login, #join { display: none; }
-    input, button { margin: 5px; padding: 5px; }
-    .large { font-size: 2em; margin: 10px 0; }
+    #bidBtn { font-size: 20px; padding: 15px 30px; }
   </style>
 </head>
 <body>
@@ -126,8 +127,12 @@
     });
 
     window.onload = () => {
-      document.getElementById('login').style.display = 'block';
-      document.getElementById('join').style.display = 'block';
+      const pw = window.location.hash === "#host";
+      if (pw) {
+        document.getElementById('login').style.display = 'block';
+      } else {
+        document.getElementById('join').style.display = 'block';
+      }
     };
   </script>
 </body>
