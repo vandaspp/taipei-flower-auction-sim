@@ -5,15 +5,21 @@
   <meta charset="UTF-8">
   <title>台北花市導覽模擬拍賣系統</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 10px; }
-    input, button { margin: 5px; padding: 10px; font-size: 16px; }
-    .large { font-size: 40px; margin: 20px 0; color: red; font-weight: bold; }
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    input, button { margin: 10px; padding: 10px; font-size: 18px; }
+    .large { font-size: 36px; margin: 15px 0; color: red; font-weight: bold; }
     #auction, #host, #login, #join { display: none; }
-    #bidBtn { font-size: 20px; padding: 15px 30px; }
+    #bidBtn { font-size: 22px; padding: 12px 30px; }
   </style>
 </head>
 <body>
-  <h2>台北花市導覽模擬拍賣系統</h2>
+  <h2>🌸 台北花市導覽模擬拍賣系統 🌸</h2>
+
+  <div id="entry">
+    <p>請選擇您的角色：</p>
+    <button onclick="showLogin()">我是主持人</button>
+    <button onclick="showJoin()">我是參與者</button>
+  </div>
 
   <div id="login">
     <p>請輸入主持人密碼</p>
@@ -55,6 +61,16 @@
     const socket = io();
     const PASSWORD = "flower123";
     let isHost = false, user = "";
+
+    function showLogin() {
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('login').style.display = 'block';
+    }
+
+    function showJoin() {
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('join').style.display = 'block';
+    }
 
     function verifyHost() {
       const pw = document.getElementById('hostPass').value;
@@ -107,15 +123,15 @@
     }
 
     socket.on('preview', ({ item, start }) => {
-      document.getElementById('bidBtn').disabled = true;
       document.getElementById('currentItem').textContent = `預告：${item} 起標價 $${start}`;
       document.getElementById('priceDisplay').textContent = '';
+      document.getElementById('bidBtn').disabled = true;
     });
 
     socket.on('update', ({ item, price }) => {
-      document.getElementById('bidBtn').disabled = false;
       document.getElementById('currentItem').textContent = `拍賣中：${item}`;
       document.getElementById('priceDisplay').textContent = `$${price}`;
+      document.getElementById('bidBtn').disabled = false;
     });
 
     socket.on('winner', ({ user, item, price }) => {
@@ -128,8 +144,12 @@
       document.getElementById('history').innerHTML = '';
     });
 
+    socket.on('stop', () => {
+      document.getElementById('bidBtn').disabled = true;
+    });
+
     window.onload = () => {
-      document.getElementById('login').style.display = 'block';
+      document.getElementById('entry').style.display = 'block';
     };
   </script>
 </body>
