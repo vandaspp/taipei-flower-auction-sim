@@ -1,59 +1,66 @@
+
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const socketIo = require('socket.io');
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = socketIo(server);
 
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
-let auctionData = {
-  item: '',
-  price: 0,
-  min: 0,
-  step: 0,
-  isRunning: false,
-  participants: new Set()
-};
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+let auctionData = {};
+let currentPrice = 0;
+let auctionInterval;
+let hasWinner = false;
+let participants = new Set();
 
 io.on('connection', socket => {
-  socket.on('join', ({ user }) => {
-    socket.username = user;
-    auctionData.participants.add(user);
-    io.emit('userCount', auctionData.participants.size);
-  });
-
   socket.on('preview', data => {
-    auctionData = { ...auctionData, ...data, isRunning: false };
-    io.emit('preview', { item: data.item, price: data.price });
+    auctionData = data;
+    currentPrice = data.start;
+    hasWinner = false;
+    io.emit('preview', { item: data.item, start: data.start });
   });
 
-  socket.on('start', () => {
-    auctionData.isRunning = true;
-    io.emit('start', auctionData);
+  socket.on('start', data => {
+    auctionData = data;
+    currentPrice = data.start;
+    hasWinner = false;
+    io.emit('update', { item: data.item, price: currentPrice });
+    clearInterval(auctionInterval);
+    auctionInterval = setInterval(() => {
+      if (currentPrice - data.decrease >= data.min) {
+        currentPrice -= data.decrease;
+        io.emit('update', { item: data.item, price: currentPrice });
+      } else {
+        clearInterval(auctionInterval);
+        io.emit('stop');
+      }
+    }, data.interval);
   });
 
   socket.on('stop', () => {
-    auctionData.isRunning = false;
+    clearInterval(auctionInterval);
     io.emit('stop');
   });
 
-  socket.on('bid', () => {
-    if (auctionData.isRunning) {
-      auctionData.price -= auctionData.step;
-      if (auctionData.price < auctionData.min) auctionData.price = auctionData.min;
-      io.emit('priceUpdate', auctionData.price);
+  socket.on('bid', ({ user }) => {
+    if (!hasWinner) {
+      hasWinner = true;
+      clearInterval(auctionInterval);
+      io.emit('winner', { user, item: auctionData.item, price: currentPrice });
     }
   });
 
-  socket.on('disconnect', () => {
-    if (socket.username) {
-      auctionData.participants.delete(socket.username);
-      io.emit('userCount', auctionData.participants.size);
-    }
+  socket.on('join', ({ user }) => {
+    participants.add(user);
+    io.emit('userCount', participants.size);
   });
-});
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log("Auction system running");
+  socket.on('clear', () => {
+    io.emit('clear');
+  });
 });
