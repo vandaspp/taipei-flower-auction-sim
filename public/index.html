@@ -40,8 +40,8 @@
 
   <div id="host">
     <div style="margin-top: 20px;">
-      <div class="large" id="hostItemName">🔖 拍賣品：尚未開始</div>
-      <div class="large" id="hostCurrentPrice">💰 目前價格：尚未開始</div>
+      <div class="large" id="currentItem">拍賣中：尚未開始</div>
+      <div class="large red" id="currentPrice">$0</div>
     </div>
     <h3>主持人控制台</h3>
     <div id="userCounter">👥 目前參與者人數：0 人</div>
@@ -212,17 +212,14 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  let currentPrice = 0;
-  let auctionInterval;
 
   socket.on('update', function(data) {
-    const itemEl = document.getElementById("hostItemName");
-    const priceEl = document.getElementById("hostCurrentPrice");
+    const itemEl = document.getElementById("currentItem");
+    const priceEl = document.getElementById("currentPrice");
     if (itemEl && priceEl) {
-      itemEl.textContent = "🔖 拍賣品：" + data.item;
-      priceEl.textContent = "💰 目前價格：$" + data.price;
+      itemEl.textContent = "拍賣中：" + data.item;
+      priceEl.textContent = "$" + data.price;
     }
-    currentPrice = data.price;
   });
 
   socket.on('participants', function(count) {
@@ -240,29 +237,7 @@
     const min = parseInt(document.getElementById("min").value);
     const decrease = parseInt(document.getElementById("decrease").value);
     const interval = parseInt(document.getElementById("interval").value);
-
-    // 廣播給其他人
     socket.emit('start', { item, start, min, decrease, interval });
-
-    // 主持人自己也執行價格遞減邏輯
-    currentPrice = start;
-    const itemEl = document.getElementById("hostItemName");
-    const priceEl = document.getElementById("hostCurrentPrice");
-    if (itemEl && priceEl) {
-      itemEl.textContent = "🔖 拍賣品：" + item;
-      priceEl.textContent = "💰 目前價格：$" + currentPrice;
-    }
-    clearInterval(auctionInterval);
-    auctionInterval = setInterval(() => {
-      if (currentPrice - decrease >= min) {
-        currentPrice -= decrease;
-        if (priceEl) {
-          priceEl.textContent = "💰 目前價格：$" + currentPrice;
-        }
-      } else {
-        clearInterval(auctionInterval);
-      }
-    }, interval);
   }
 </script>
 </body>
