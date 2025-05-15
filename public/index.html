@@ -10,7 +10,12 @@
     .large { font-size: 36px; margin: 15px 0; color: red; font-weight: bold; }
     #auction, #host, #login, #join { display: none; }
     #bidBtn { font-size: 22px; padding: 12px 30px; }
-  </style>
+      @media (max-width: 768px) {
+      body { font-size: 16px; padding: 10px; }
+      input, button { width: 90%; font-size: 20px; }
+      .large { font-size: 28px; }
+    }
+</style>
 </head>
 <body>
   <h2>🌸 台北花市導覽模擬拍賣系統 🌸</h2>
@@ -34,6 +39,10 @@
   </div>
 
   <div id="host">
+    <div style="margin-top: 20px;">
+      <div class="large" id="hostItemName">🔖 拍賣品：尚未開始</div>
+      <div class="large" id="hostCurrentPrice">💰 目前價格：尚未開始</div>
+    </div>
     <h3>主持人控制台</h3>
     <div id="userCounter">👥 目前參與者人數：0 人</div>
     <input id="item" placeholder="花卉名稱">
