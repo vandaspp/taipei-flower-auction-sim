@@ -212,6 +212,8 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
+  let currentPrice = 0;
+  let auctionInterval;
 
   socket.on('update', function(data) {
     const itemEl = document.getElementById("currentItem");
@@ -219,6 +221,16 @@
     if (itemEl && priceEl) {
       itemEl.textContent = "拍賣中：" + data.item;
       priceEl.textContent = "$" + data.price;
+    }
+    currentPrice = data.price;
+  });
+
+  socket.on('notice', function(data) {
+    const itemEl = document.getElementById("currentItem");
+    const priceEl = document.getElementById("currentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "預告：" + data.item + " 起標價 $" + data.start;
+      priceEl.textContent = "";
     }
   });
 
@@ -237,7 +249,29 @@
     const min = parseInt(document.getElementById("min").value);
     const decrease = parseInt(document.getElementById("decrease").value);
     const interval = parseInt(document.getElementById("interval").value);
+
+    currentPrice = start;
+    const itemEl = document.getElementById("currentItem");
+    const priceEl = document.getElementById("currentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "拍賣中：" + item;
+      priceEl.textContent = "$" + currentPrice;
+    }
+
     socket.emit('start', { item, start, min, decrease, interval });
+
+    clearInterval(auctionInterval);
+    auctionInterval = setInterval(() => {
+      if (currentPrice - decrease >= min) {
+        currentPrice -= decrease;
+        if (priceEl) {
+          priceEl.textContent = "$" + currentPrice;
+        }
+        socket.emit('update', { item, price: currentPrice });
+      } else {
+        clearInterval(auctionInterval);
+      }
+    }, interval);
   }
 </script>
 </body>
