@@ -69,6 +69,16 @@
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script>
     const socket = io();
+
+  function updateHostDisplay(data) {
+    const itemEl = document.getElementById("hostItemName");
+    const priceEl = document.getElementById("hostCurrentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "🔖 拍賣品：" + data.item;
+      priceEl.textContent = "💰 目前價格：$" + data.price;
+    }
+  }
+
     const PASSWORD = "flower123";
     let isHost = false, user = "";
 
@@ -107,6 +117,9 @@
     }
 
     function startAuction() {
+  const item = document.getElementById("item").value;
+  const start = parseInt(document.getElementById("start").value);
+  updateHostDisplay({ item: item, price: start });
   const item = document.getElementById("item").value;
   const start = parseInt(document.getElementById("start").value);
   const itemEl = document.getElementById("hostItemName");
@@ -182,6 +195,16 @@
 
 <script>
   const socket = io();
+
+  function updateHostDisplay(data) {
+    const itemEl = document.getElementById("hostItemName");
+    const priceEl = document.getElementById("hostCurrentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "🔖 拍賣品：" + data.item;
+      priceEl.textContent = "💰 目前價格：$" + data.price;
+    }
+  }
+
 
   socket.on('update', function(data) {
     const itemEl = document.getElementById("hostItemName");
