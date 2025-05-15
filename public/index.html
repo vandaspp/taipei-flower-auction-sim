@@ -170,5 +170,33 @@
       document.getElementById('entry').style.display = 'block';
     };
   </script>
+
+<script>
+  const socket = io();
+
+  socket.on('update', function(data) {
+    const itemEl = document.getElementById("hostItemName");
+    const priceEl = document.getElementById("hostCurrentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "🔖 拍賣品：" + data.item;
+      priceEl.textContent = "💰 目前價格：$" + data.price;
+    }
+
+    const userCountEl = document.getElementById("userCounter");
+    if (userCountEl) {
+      socket.emit('getParticipants'); // 主持人可主動要求更新人數
+    }
+  });
+
+  socket.on('participants', function(count) {
+    const userCountEl = document.getElementById("userCounter");
+    if (userCountEl) {
+      userCountEl.textContent = "👥 目前參與者人數：" + count + " 人";
+    }
+  });
+
+  // 預設自動請求參與者數量
+  socket.emit('getParticipants');
+</script>
 </body>
 </html>
