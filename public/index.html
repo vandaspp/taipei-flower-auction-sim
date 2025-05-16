@@ -40,7 +40,7 @@
 
   <div id="host">
     <div style="margin-top: 20px;">
-      <div class="large" id="currentItem">拍賣中：尚未開始</div>
+      <div class="large" id="currentItem">預告：尚未開始</div>
       <div class="large red" id="currentPrice">$0</div>
     </div>
     <h3>主持人控制台</h3>
@@ -216,22 +216,13 @@
   let auctionInterval;
 
   socket.on('notice', function(data) {
-    const itemEl = document.getElementById("currentItem");
-    const priceEl = document.getElementById("currentPrice");
-    if (itemEl && priceEl) {
-      itemEl.textContent = "預告：" + data.item + " 起標價 $" + data.start;
-      priceEl.textContent = "";
-    }
+    document.getElementById("currentItem").textContent = "預告：" + data.item + " 起標價 $" + data.start;
+    document.getElementById("currentPrice").textContent = "";
   });
 
   socket.on('update', function(data) {
-    const itemEl = document.getElementById("currentItem");
-    const priceEl = document.getElementById("currentPrice");
-    if (itemEl && priceEl) {
-      itemEl.textContent = "拍賣中：" + data.item;
-      priceEl.textContent = "$" + data.price;
-    }
-    currentPrice = data.price;
+    document.getElementById("currentItem").textContent = "拍賣中：" + data.item;
+    document.getElementById("currentPrice").textContent = "$" + data.price;
   });
 
   socket.on('participants', function(count) {
@@ -251,12 +242,8 @@
     const interval = parseInt(document.getElementById("interval").value);
 
     currentPrice = start;
-    const itemEl = document.getElementById("currentItem");
-    const priceEl = document.getElementById("currentPrice");
-    if (itemEl && priceEl) {
-      itemEl.textContent = "拍賣中：" + item;
-      priceEl.textContent = "$" + currentPrice;
-    }
+    document.getElementById("currentItem").textContent = "拍賣中：" + item;
+    document.getElementById("currentPrice").textContent = "$" + currentPrice;
 
     socket.emit('start', { item, start, min, decrease, interval });
 
@@ -264,9 +251,7 @@
     auctionInterval = setInterval(() => {
       if (currentPrice - decrease >= min) {
         currentPrice -= decrease;
-        if (priceEl) {
-          priceEl.textContent = "$" + currentPrice;
-        }
+        document.getElementById("currentPrice").textContent = "$" + currentPrice;
         socket.emit('update', { item, price: currentPrice });
       } else {
         clearInterval(auctionInterval);
