@@ -215,6 +215,15 @@
   let currentPrice = 0;
   let auctionInterval;
 
+  socket.on('notice', function(data) {
+    const itemEl = document.getElementById("currentItem");
+    const priceEl = document.getElementById("currentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "預告：" + data.item + " 起標價 $" + data.start;
+      priceEl.textContent = "";
+    }
+  });
+
   socket.on('update', function(data) {
     const itemEl = document.getElementById("currentItem");
     const priceEl = document.getElementById("currentPrice");
@@ -223,15 +232,6 @@
       priceEl.textContent = "$" + data.price;
     }
     currentPrice = data.price;
-  });
-
-  socket.on('notice', function(data) {
-    const itemEl = document.getElementById("currentItem");
-    const priceEl = document.getElementById("currentPrice");
-    if (itemEl && priceEl) {
-      itemEl.textContent = "預告：" + data.item + " 起標價 $" + data.start;
-      priceEl.textContent = "";
-    }
   });
 
   socket.on('participants', function(count) {
