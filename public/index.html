@@ -20,11 +20,13 @@
 <body>
   <h2>🌸 台北花市 導覽模擬拍賣 🌸</h2>
 
-  <div id="entry">
-    <p>請選擇您的角色：</p>
-    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="showLogin()">我是主持人</button>
-    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="showJoin()">我是參與者</button>
-  </div>
+  
+<div id="entry" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+  <h1 style="font-size: 2.8rem; margin-bottom: 2rem;">台北花市 導覽模擬拍賣</h1>
+  <button id="viewerBtn" style="font-size: 2rem; padding: 1.5rem 2.5rem; margin-bottom: 2rem; width: 90%;">我是參與者</button>
+  <button id="hostBtn" style="font-size: 2rem; padding: 1.5rem 2.5rem; width: 90%;">我是主持人</button>
+</div>
+
 
   <div id="login">
     <p>請輸入主持人密碼</p>
@@ -67,149 +69,7 @@
   <ul id="history"></ul>
 
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script>
-    const socket = io();
-    const PASSWORD = "flower123";
-    let isHost = false, user = "";
-
-    function showLogin() {
-      document.getElementById('entry').style.display = 'none';
-      document.getElementById('login').style.display = 'block';
-    }
-
-    function showJoin() {
-      document.getElementById('entry').style.display = 'none';
-      document.getElementById('join').style.display = 'block';
-    }
-
-    function verifyHost() {
-      const pw = document.getElementById('hostPass').value;
-      if (pw === PASSWORD) {
-        isHost = true;
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('host').style.display = 'block';
-      } else alert("密碼錯誤");
-    }
-
-    function joinAuction() {
-      const name = document.getElementById('userName').value.trim();
-      if (!name) return alert("請輸入名稱");
-      user = name;
-      document.getElementById('join').style.display = 'none';
-      document.getElementById('auction').style.display = 'block';
-      document.getElementById('bidBtn').disabled = true;
-      socket.emit('join', { user });
-    }
-
-    function previewAuction() {
-      const data = getFormData();
-      socket.emit('preview', data);
-    }
-
-    function startAuction() {
-  const item = document.getElementById("item").value;
-  const start = parseInt(document.getElementById("start").value);
-  const itemEl = document.getElementById("hostItemName");
-  const priceEl = document.getElementById("hostCurrentPrice");
-  if (itemEl && priceEl) {
-    itemEl.textContent = "🔖 拍賣品：" + item;
-    priceEl.textContent = "💰 目前價格：$" + start;
-  }
-
-      const data = getFormData();
-      socket.emit('start', data);
-    }
-
-    function stopAuction() {
-      socket.emit('stop');
-    }
-
-    function clearHistory() {
-      document.getElementById('history').innerHTML = '';
-      socket.emit('clear');
-    }
-
-    function placeBid() {
-      socket.emit('bid', { user });
-    }
-
-    function getFormData() {
-      return {
-        item: document.getElementById('item').value,
-        start: parseInt(document.getElementById('start').value),
-        min: parseInt(document.getElementById('min').value),
-        decrease: parseInt(document.getElementById('decrease').value),
-        interval: parseInt(document.getElementById('interval').value)
-      };
-    }
-
-    socket.on('preview', ({ item, start }) => {
-      document.getElementById('currentItem').textContent = `預告：${item} 起標價 $${start}`;
-      document.getElementById('priceDisplay').textContent = '';
-      document.getElementById('bidBtn').disabled = true;
-    });
-
-    socket.on('update', ({ item, price }) => {
-      document.getElementById('currentItem').textContent = `拍賣中：${item}`;
-      document.getElementById('priceDisplay').textContent = `$${price}`;
-      document.getElementById('bidBtn').disabled = false;
-    });
-
-    socket.on('winner', ({ user, item, price }) => {
-      const li = document.createElement('li');
-      li.textContent = `${user} 得標「${item}」$${price}`;
-      document.getElementById('history').appendChild(li);
-    });
-
-    socket.on('clear', () => {
-      document.getElementById('history').innerHTML = '';
-    });
-
-    socket.on('stop', () => {
-      document.getElementById('bidBtn').disabled = true;
-    });
-
-    socket.on('userCount', (count) => {
-      if (isHost) {
-        document.getElementById('userCounter').textContent = `👥 目前參與者人數：${count} 人`;
-      }
-    });
-
-    window.onload = () => {
-      document.getElementById('entry').style.display = 'block';
-    };
-  </script>
-
-<script>
-  const socket = io();
-
-  socket.on('update', function(data) {
-    const itemEl = document.getElementById("hostItemName");
-    const priceEl = document.getElementById("hostCurrentPrice");
-    if (itemEl && priceEl) {
-      itemEl.textContent = "🔖 拍賣品：" + data.item;
-      priceEl.textContent = "💰 目前價格：$" + data.price;
-    }
-
-    const userCountEl = document.getElementById("userCounter");
-    if (userCountEl) {
-      socket.emit('getParticipants'); // 主持人可主動要求更新人數
-    }
-  });
-
-  socket.on('participants', function(count) {
-    const userCountEl = document.getElementById("userCounter");
-    if (userCountEl) {
-      userCountEl.textContent = "👥 目前參與者人數：" + count + " 人";
-    }
-  });
-
-  // 預設自動請求參與者數量
-  socket.emit('getParticipants');
-
-</html>
-
-
+  
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -221,13 +81,8 @@
 
     socket.on('update', function(data) {
       console.log("📡 收到 update 廣播：", data);
-
       const itemEl = document.getElementById("hostItemName");
       const priceEl = document.getElementById("hostCurrentPrice");
-
-      if (!itemEl) console.warn("❗ hostItemName 不存在");
-      if (!priceEl) console.warn("❗ hostCurrentPrice 不存在");
-
       if (itemEl && priceEl) {
         itemEl.textContent = "🔖 拍賣品：" + data.item;
         priceEl.textContent = "💰 目前價格：$" + data.price;
