@@ -231,4 +231,50 @@
 
   socket.emit('getParticipants');
 </script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  let currentPrice = 0;
+  let auctionInterval;
+
+  socket.on('participants', function(count) {
+    const userCountEl = document.getElementById("userCounter");
+    if (userCountEl) {
+      userCountEl.textContent = "👥 目前參與者人數：" + count + " 人";
+    }
+  });
+
+  socket.emit('getParticipants');
+
+  function startAuction() {
+    const item = document.getElementById("item").value;
+    const start = parseInt(document.getElementById("start").value);
+    const min = parseInt(document.getElementById("min").value);
+    const decrease = parseInt(document.getElementById("decrease").value);
+    const interval = parseInt(document.getElementById("interval").value);
+
+    currentPrice = start;
+    const itemEl = document.getElementById("hostItemName");
+    const priceEl = document.getElementById("hostCurrentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "🔖 拍賣品：" + item;
+      priceEl.textContent = "💰 目前價格：$" + currentPrice;
+    }
+
+    socket.emit('start', { item, start, min, decrease, interval });
+
+    clearInterval(auctionInterval);
+    auctionInterval = setInterval(() => {
+      if (currentPrice - decrease >= min) {
+        currentPrice -= decrease;
+        if (priceEl) {
+          priceEl.textContent = "💰 目前價格：$" + currentPrice;
+        }
+      } else {
+        clearInterval(auctionInterval);
+      }
+    }, interval);
+  }
+</script>
 </body>
