@@ -19,6 +19,7 @@ let participants = new Set();
 
 io.on('connection', socket => {
   socket.on('preview', data => {
+    io.emit('notice', { item: data.item, start: data.start });
     auctionData = data;
     currentPrice = data.start;
     hasWinner = false;

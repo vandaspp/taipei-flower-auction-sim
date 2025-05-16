@@ -234,6 +234,12 @@
 
   socket.emit('getParticipants');
 
+  function previewAuction() {
+    const item = document.getElementById("item").value;
+    const start = parseInt(document.getElementById("start").value);
+    socket.emit('preview', { item, start });
+  }
+
   function startAuction() {
     const item = document.getElementById("item").value;
     const start = parseInt(document.getElementById("start").value);
