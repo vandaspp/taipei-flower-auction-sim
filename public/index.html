@@ -208,3 +208,27 @@
   socket.emit('getParticipants');
 
 </html>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  socket.on('update', function(data) {
+    const itemEl = document.getElementById("hostItemName");
+    const priceEl = document.getElementById("hostCurrentPrice");
+    if (itemEl && priceEl) {
+      itemEl.textContent = "🔖 拍賣品：" + data.item;
+      priceEl.textContent = "💰 目前價格：$" + data.price;
+    }
+  });
+
+  socket.on('participants', function(count) {
+    const userCountEl = document.getElementById("userCounter");
+    if (userCountEl) {
+      userCountEl.textContent = "👥 目前參與者人數：" + count + " 人";
+    }
+  });
+
+  socket.emit('getParticipants');
+</script>
+</body>
