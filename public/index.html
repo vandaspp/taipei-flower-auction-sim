@@ -22,20 +22,20 @@
 
   <div id="entry">
     <p>請選擇您的角色：</p>
-    <button onclick="showLogin()">我是主持人</button>
-    <button onclick="showJoin()">我是參與者</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="showLogin()">我是主持人</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="showJoin()">我是參與者</button>
   </div>
 
   <div id="login">
     <p>請輸入主持人密碼</p>
-    <input id="hostPass" type="password" placeholder="輸入密碼" />
-    <button onclick="verifyHost()">登入主持人</button>
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="hostPass" type="password" placeholder="輸入密碼" />
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="verifyHost()">登入主持人</button>
   </div>
 
   <div id="join">
     <p>請輸入您的名字參與拍賣</p>
-    <input id="userName" placeholder="您的名稱" />
-    <button onclick="joinAuction()">進入</button>
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="userName" placeholder="您的名稱" />
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="joinAuction()">進入</button>
   </div>
 
   <div id="host">
@@ -45,22 +45,22 @@
     </div>
     <h3>主持人控制台</h3>
     <div id="userCounter">👥 目前參與者人數：0 人</div>
-    <input id="item" placeholder="花卉名稱">
-    <input id="start" placeholder="起標價" type="number">
-    <input id="min" placeholder="底價" type="number">
-    <input id="decrease" placeholder="每次遞減金額" type="number">
-    <input id="interval" placeholder="遞減間隔(ms)" type="number" value="1000">
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="item" placeholder="花卉名稱">
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="start" placeholder="起標價" type="number">
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="min" placeholder="底價" type="number">
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="decrease" placeholder="每次遞減金額" type="number">
+    <input style="font-size: 1.2rem; padding: 0.8rem;" id="interval" placeholder="遞減間隔(ms)" type="number" value="1000">
     <br>
-    <button onclick="previewAuction()">拍賣預告</button>
-    <button onclick="startAuction()">開始拍賣</button>
-    <button onclick="stopAuction()">結束</button>
-    <button onclick="clearHistory()">清除紀錄</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="previewAuction()">拍賣預告</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="startAuction()">開始拍賣</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="stopAuction()">結束</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" onclick="clearHistory()">清除紀錄</button>
   </div>
 
   <div id="auction">
     <h3 id="currentItem"></h3>
     <div id="priceDisplay" class="large"></div>
-    <button id="bidBtn" onclick="placeBid()">我要出價</button>
+    <button style="font-size: 1.5rem; padding: 1rem 2rem;" id="bidBtn" onclick="placeBid()">我要出價</button>
   </div>
 
   <h4>得標紀錄</h4>
