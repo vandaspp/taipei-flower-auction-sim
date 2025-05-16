@@ -231,4 +231,36 @@
 
   socket.emit('getParticipants');
 </script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  console.log("📦 主持人畫面載入成功");
+
+  const socket = io();
+
+  socket.on('update', function(data) {
+    console.log("📡 收到 update 廣播：", data);
+
+    const itemEl = document.getElementById("hostItemName");
+    const priceEl = document.getElementById("hostCurrentPrice");
+
+    if (!itemEl) console.warn("❗ hostItemName 不存在");
+    if (!priceEl) console.warn("❗ hostCurrentPrice 不存在");
+
+    if (itemEl && priceEl) {
+      itemEl.textContent = "🔖 拍賣品：" + data.item;
+      priceEl.textContent = "💰 目前價格：$" + data.price;
+      console.log("✅ 更新主持人畫面成功");
+    }
+  });
+
+  socket.on('participants', function(count) {
+    const userCountEl = document.getElementById("userCounter");
+    if (userCountEl) {
+      userCountEl.textContent = "👥 目前參與者人數：" + count + " 人";
+    }
+  });
+
+  socket.emit('getParticipants');
+</script>
 </body>
