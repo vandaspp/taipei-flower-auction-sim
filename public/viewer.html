@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>參與者畫面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+  <h1>參與者畫面</h1>
+  <div id="itemName" style="font-size: 2rem; margin-top: 1rem;"></div>
+  <div id="currentPrice" style="font-size: 2.5rem; margin-top: 1rem; color: blue;"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.on('update', function(data) {
+      document.getElementById("itemName").textContent = "🔖 拍賣品：" + data.item;
+      document.getElementById("currentPrice").textContent = "💰 目前價格：$" + data.price;
+    });
+  </script>
+</body>
+</html>
