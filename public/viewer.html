@@ -5,11 +5,35 @@
   <meta charset="UTF-8">
   <title>參與者畫面</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+    #itemName {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    #currentPrice {
+      font-size: 3rem;
+      color: #007aff;
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+<body>
   <h1>參與者畫面</h1>
-  <div id="itemName" style="font-size: 2rem; margin-top: 1rem;"></div>
-  <div id="currentPrice" style="font-size: 2.5rem; margin-top: 1rem; color: blue;"></div>
+  <div id="itemName">🔖 拍賣品：</div>
+  <div id="currentPrice">💰 價格：</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
