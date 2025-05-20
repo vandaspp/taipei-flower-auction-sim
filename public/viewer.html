@@ -3,7 +3,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>參與者畫面</title>
+  <title>參與者畫面 Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -15,6 +15,7 @@
       align-items: center;
       justify-content: center;
       background-color: #f0f0f0;
+      height: 100vh;
     }
     h1 {
       font-size: 2.5rem;
@@ -22,26 +23,28 @@
     }
     #itemName {
       font-size: 2rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     #currentPrice {
       font-size: 3rem;
-      color: #007aff;
+      color: red;
+      margin-bottom: 2rem;
+    }
+    #bidButton {
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      background-color: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>參與者畫面</h1>
-  <div id="itemName">🔖 拍賣品：</div>
-  <div id="currentPrice">💰 價格：</div>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    socket.on('update', function(data) {
-      document.getElementById("itemName").textContent = "🔖 拍賣品：" + data.item;
-      document.getElementById("currentPrice").textContent = "💰 目前價格：$" + data.price;
-    });
-  </script>
+  <div id="itemName">🔖 拍賣品：文心蘭</div>
+  <div id="currentPrice">💰 目前價格：$150</div>
+  <button id="bidButton" onclick="alert('出價成功！')">我要出價</button>
 </body>
 </html>
